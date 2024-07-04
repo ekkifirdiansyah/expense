@@ -1,16 +1,33 @@
 import 'package:expense/app/constant/color.dart';
 import 'package:expense/app/modules/widgets/info_balance.dart';
 import 'package:flutter/material.dart';
-
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:get/get.dart';
-
+import 'package:syncfusion_flutter_charts/charts.dart';
 import '../controllers/home_controller.dart';
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: HomeView(),
+    );
+  }
+}
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final List<SalesData> chartData = [
+      SalesData(DateTime(2020), 35),
+      SalesData(DateTime(2021), 28),
+      SalesData(DateTime(2022), 34),
+      SalesData(DateTime(2023), 32),
+      SalesData(DateTime(2024), 40)
+    ];
     return Scaffold(
       body: Stack(
         children: [
@@ -89,7 +106,18 @@ class HomeView extends GetView<HomeController> {
                       SizedBox(height: 15),
                       Container(
                         height: 200,
-                        color: appPrimary,
+                        child: SfCartesianChart(
+                          primaryXAxis: DateTimeAxis(),
+                          series: <CartesianSeries>[
+                            // Renders line chart
+                            LineSeries<SalesData, DateTime>(
+                                dataSource: chartData,
+                                xValueMapper: (SalesData sales, _) =>
+                                    sales.year,
+                                yValueMapper: (SalesData sales, _) =>
+                                    sales.sales)
+                          ],
+                        ),
                       ),
                       SizedBox(height: 15),
                       Row(
@@ -192,6 +220,7 @@ class HomeView extends GetView<HomeController> {
                                           Text(
                                             "Shopping",
                                             style: TextStyle(
+                                              color: appText,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -239,6 +268,26 @@ class HomeView extends GetView<HomeController> {
           ),
         ],
       ),
+      bottomNavigationBar: ConvexAppBar(
+        backgroundColor: appWhite,
+        color: appPrimary,
+        activeColor: appPrimary,
+        items: [
+          TabItem(icon: Icons.home, title: 'Home'),
+          TabItem(icon: Icons.map, title: 'Transaction'),
+          TabItem(icon: Icons.add, title: 'Add'),
+          TabItem(icon: Icons.message, title: 'Budget'),
+          TabItem(icon: Icons.people, title: 'Profile'),
+        ],
+        initialActiveIndex: 0,
+        onTap: (int i) => print('click index=$i'),
+      ),
     );
   }
+}
+
+class SalesData {
+  SalesData(this.year, this.sales);
+  final DateTime year;
+  final double sales;
 }
